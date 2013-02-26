@@ -1,29 +1,20 @@
 module.exports = if_else
 
-// "write a module that works like the example tag 
-// module but implements simple if and else checking.""
-
-// *** EXAMPLE if and else tag:
-// Evaluates a variable, and if that variable is “true” the contents of the block are displayed:
-// {% if athlete_list %}
-//     Number of athletes: {{ athlete_list|length }}
-// {% else %}
-//     No athletes.
-// {% endif %}
-
+var parser = require('parser')
 
 
 function if_else(parser, contents) { 
-  var bits = contents.split(/\s+/)  // ["for", "item", "in", "items"]
-    , contextTarget = bits[1]
-    , lookupContextVariable = parser.lookup(bits[3]) 
+  var bits = contents.split(/\s+/)  // ["if", "item"]
+    , contextTarget = bits[1] // "item"
+    , lookupContextVariable = parser.lookup(bits[1]) // parser.lookup("item")
     , ifBody
     , emptyBody
 
   parser.parse({
-    // do I just need 'endif'? Or do I also need 'else' and 'elsif'?
+      'else':  else_tpl
+      'elsif': elsif
       'endif': endif
-    , 'empty': empty
+      'empty': empty
   })
 
   return function(context) {
@@ -57,6 +48,22 @@ function if_else(parser, contents) {
   }
 
   function endif(tpl) {
+    if(ifBody) {
+      emptyBody = tpl
+    } else {
+      ifBody = tpl
+    }
+  }
+
+  function elsif(tpl) {
+    if(ifBody) {
+      emptyBody = tpl
+    } else {
+      ifBody = tpl
+    }
+  }
+
+  function else_tpl(tpl){
     if(ifBody) {
       emptyBody = tpl
     } else {
